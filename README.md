@@ -1,1 +1,1 @@
-# FORECAST_cell_classification
+# FORECAST Digital Pathology analysis
