@@ -1,1 +1,1 @@
-# FORECAST Digital Pathology analysis
+# FORECAST Gleason Segmentation Pipeline
