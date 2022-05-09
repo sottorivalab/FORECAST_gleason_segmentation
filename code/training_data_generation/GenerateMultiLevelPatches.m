@@ -188,15 +188,19 @@ function PatchParams = GenerateMultiLevelPatches(TilePath, Boundaries, NPatches,
                     padding = [max(1-loadRegion(1:2), 0) max(loadRegion(3:4)-floor(ImageSize*(2.^-ImageLevels(i))), 0)];
                     loadRegion = [loadRegion(1:2)+padding(1:2), loadRegion(3:4)-padding(3:4)];
                     
-                    image = imread_cws(TilePath, ImageSize, TileSize, ImageLevels(i), {loadRegion([2 4]), loadRegion([1 3])});
-                    image = padarray(image, padding([2, 1]), 255, 'pre');
-                    image = padarray(image, padding([4, 3]), 255, 'post');
+                    if loadRegion(1) > loadRegion(3) || loadRegion(2) > loadRegion(4)
+                        tImage = 255*ones([OutPatchSize, 3]);
+                    else
+                        image = imread_cws(TilePath, ImageSize, TileSize, ImageLevels(i), {loadRegion([2 4]), loadRegion([1 3])});
+                        image = padarray(image, padding([2, 1]), 255, 'pre');
+                        image = padarray(image, padding([4, 3]), 255, 'post');
+
+                        worldCoordRef = imref2d(size(image), tImageRegion([1 3]), tImageRegion([2 4]));
+                        localCoordRef = imref2d(InPatchSize, imageRegion([1 4], 1)', imageRegion([1 4], 2)');
+
+                        tImage = imwarp(image, worldCoordRef, invert(affine2d(tMat)), 'OutputView', localCoordRef, 'FillValues', 255);
+                    end
                     
-                    worldCoordRef = imref2d(size(image), tImageRegion([1 3]), tImageRegion([2 4]));
-                    localCoordRef = imref2d(InPatchSize, imageRegion([1 4], 1)', imageRegion([1 4], 2)');
-
-                    tImage = imwarp(image, worldCoordRef, invert(affine2d(tMat)), 'OutputView', localCoordRef, 'FillValues', 255);
-
                     imwrite(imresize(tImage, OutPatchSize), levelPath);
                 end
             end
